@@ -50,8 +50,15 @@ defmodule SlTry do
         body = decode(message)
         case body do
           %{"type" => "message", "channel" => channel, "user" => sender, "text" => text} ->
-            if String.contains?(text, "Hi <@#{user}>") do
-              say(socket, channel, "Hi <@#{sender}>")
+            if String.contains?(text, "<@#{user}>") do
+              if String.contains?(text, "Hi <@#{user}>") do
+                say(socket, channel, "Hi <@#{sender}>")
+              end
+              if String.contains?(text, "fortune") do
+                {fortune, _} = System.cmd "fortune", []
+                {cow_fortune, _} = System.cmd "cowsay", [fortune]
+                say(socket, channel, "```\n#{cow_fortune}\n```")
+              end
             end
           _ ->
             nil
