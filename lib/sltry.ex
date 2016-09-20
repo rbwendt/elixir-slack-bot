@@ -78,5 +78,3 @@ defmodule SlTry do
     socket |> (Socket.Web.send! { :text, body })
   end
 end
-
-SlTry.init
