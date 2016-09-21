@@ -50,16 +50,7 @@ defmodule SlTry do
         body = decode(message)
         case body do
           %{"type" => "message", "channel" => channel, "user" => sender, "text" => text} ->
-            if String.contains?(text, "<@#{user}>") do
-              if String.contains?(text, "Hi <@#{user}>") do
-                say(socket, channel, "Hi <@#{sender}>")
-              end
-              if String.contains?(text, "fortune") do
-                {fortune, _} = System.cmd "fortune", []
-                {cow_fortune, _} = System.cmd "cowsay", [fortune]
-                say(socket, channel, "```\n#{cow_fortune}\n```")
-              end
-            end
+            handle_text(socket, channel, sender, text, user)
           _ ->
             nil
         end
@@ -68,6 +59,43 @@ defmodule SlTry do
     end
 
     converse(socket, user)
+  end
+
+  def handle_text(socket, channel, sender, text, user) do
+    if String.contains?(text, "<@#{user}>") do
+      if String.contains?(text, "Hi <@#{user}>") do
+        say(socket, channel, "Hi <@#{sender}>")
+      end
+      if String.contains?(text, "fortune") do
+        fortune = get_fortune(user, text)
+        # if text == "<@#{user}> fortune" do
+        #   {fortune, _} = System.cmd "fortune", []
+        # else
+        #   [_ | fortune] = String.split(text, "fortune")
+        # end
+        say(socket, channel, "```\n#{cowsay(fortune)}\n```")
+      end
+    end
+  end
+
+  def get_fortune(user, text) do
+    user_fortune = "<@#{user}> fortune"
+    case text do
+      ^user_fortune ->
+        {fortune, _} = System.cmd "fortune", []
+        fortune
+      _ ->
+        [_ | fortune] = String.split(text, "fortune")
+        "#{fortune}"
+    end
+  end
+
+  def cowsay(s) do
+    cow_options = ["-b", "-d", "-g", "-p", "-s", "-t", "-w", "-y"]
+    cow_option = Enum.random(cow_options)
+
+    {cow_string, _} = System.cmd "cowsay", [cow_option, s]
+    cow_string
   end
 
   def say(socket, channel, text) do
