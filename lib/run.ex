@@ -1,5 +1,5 @@
 defmodule Run do
-  def main(args) do
+  def main(_) do
     SlTry.init
   end
 end
